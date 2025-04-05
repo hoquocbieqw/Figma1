@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Quản lý nội dung học tập và câu hỏi kiểm tra</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS chung */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #8cc152;
+            --secondary: #967adc;
+            --dark-purple: #5e35b1;
+            --light-purple: #f5e8ff;
+            --background: #f5f7fa;
+            --text: #333;
+            --light-text: #777;
+            --border: #ddd;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: var(--secondary);
+            color: white;
+            padding: 20px 0;
+            height: 100vh;
+            position: fixed;
+            overflow-y: auto;
+        }
+
+        .logo {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .logo h2 {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .menu a:hover, .menu a.active {
+            background-color: rgba(255,255,255,0.1);
+            border-left: 4px solid var(--primary);
+        }
+
+        .menu a i {
+            margin-right: 10px;
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background-color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .module-title {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .module-title h2 {
+            font-size: 18px;
+        }
+
+        /* Business Rules */
+        .business-rules {
+            background-color: #e7f4ff;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .business-rules h3 {
+            color: #3498db;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .business-rules ul {
+            list-style-type: none;
+        }
+
+        .business-rules li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+            font-size: 14px;
+        }
+
+        .business-rules li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background-color: var(--dark-purple);
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+        }
+
+        .tab-item {
+            flex: 1;
+            text-align: center;
+            padding: 15px 10px;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-item.active {
+            background-color: rgba(255,255,255,0.1);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 2px rgba(150, 122, 220, 0.2);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .action-buttons .btn-sm {
+            margin-right: 5px;
+        }
+
+        /* Status Badges */
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-published {
+            background-color: rgba(46, 204, 113, 0.1);
+            color: var(--success);
+        }
+
+        .status-draft {
+            background-color: rgba(243, 156, 18, 0.1);
+            color: var(--warning);
+        }
+
+        .status-pending {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+        }
+
+        /* Search and Filter */
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-item {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-box {
+            display: flex;
+            max-width: 300px;
+        }
+
+        .search-box input {
+            flex: 1;
+            border-right: none;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .search-box button {
+            border-radius: 0 4px 4px 0;
+            padding: 10px 15px;
+        }
+
+        /* Panel */
+        .panel {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .panel-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+        }
+
+        .panel-body {
+            padding: 15px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+
+            .sidebar .logo h2, .sidebar .menu span {
+                display: none;
+            }
+
+            .sidebar .menu a {
+                justify-content: center;
+                padding: 15px;
+            }
+
+            .sidebar .menu a i {
+                margin-right: 0;
+            }
+
+            .main-content {
+                margin-left: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <img src="logo.png" alt="Logo" width="60" height="60">
+                <h2>ADMIN DASHBOARD</h2>
+            </div>
+            <div class="menu">
+                <a href="#dashboard"><i class="fas fa-home"></i> <span>Dashboard</span></a>
+                <a href="#ua1" class="active"><i class="fas fa-book"></i> <span>Quản lý nội dung</span></a>
+                <a href="#ua2"><i class="fas fa-gamepad"></i> <span>Quản lý chế độ chơi</span></a>
+                <a href="#ua3"><i class="fas fa-users"></i> <span>Quản lý tài khoản</span></a>
+                <a href="#ua4"><i class="fas fa-chart-line"></i> <span>Theo dõi & tối ưu</span></a>
+                <a href="#settings"><i class="fas fa-cog"></i> <span>Cài đặt</span></a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header">
+                <div>
+                    <h2>Quản lý nội dung học tập và câu hỏi kiểm tra</h2>
+                </div>
+                <div>
+                    <span>Xin chào, Admin</span>
+                </div>
+            </div>
+
+            <!-- Module Title -->
+            <div class="module-title">
+                <h2>UA1 - Quản lý nội dung học tập và câu hỏi kiểm tra</h2>
+            </div>
+
+            <!-- Business Rules -->
+            <div class="business-rules">
+                <h3>Business Rules:</h3>
+                <ul>
+                    <li><strong>BR1:</strong> Chỉ Admin có quyền thêm, sửa, xóa nội dung bài học và câu hỏi kiểm tra.</li>
+                    <li><strong>BR2:</strong> Nội dung bài học và câu hỏi phải được kiểm duyệt trước khi xuất bản.</li>
+                    <li><strong>BR3:</strong> Câu hỏi kiểm tra phải có ít nhất 2 đáp án lựa chọn, tối đa 4 đáp án.</li>
+                    <li><strong>BR4:</strong> Thời gian làm bài kiểm tra phải được thiết lập phù hợp với độ khó của câu hỏi.</li>
+                    <li><strong>BR5:</strong> Hệ thống tự động lưu lại lịch sử chỉnh sửa nội dung để kiểm tra và khôi phục khi cần.</li>
+                </ul>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab-item active" data-tab="tab1">1. Đăng nhập hệ thống quản trị</div>
+                <div class="tab-item" data-tab="tab2">2. Quản lý danh mục bài học</div>
+                <div class="tab-item" data-tab="tab3">3. Quản lý câu hỏi kiểm tra</div>
+                <div class="tab-item" data-tab="tab4">4. Kiểm duyệt và xuất bản nội dung</div>
+                <div class="tab-item" data-tab="tab5">5. Theo dõi và cập nhật nội dung</div>
+            </div>
+
+            <div class="tab-content">
+                <!-- Tab 1: Đăng nhập hệ thống quản trị -->
+                <div class="tab-pane active" id="tab1">
+                    <div class="panel">
+                        <div class="panel-header">
+                            Đăng nhập bằng tài khoản Admin
+                        </div>
+                        <div class="panel-body">
+                            <form>
+                                <div class="form-group">
+                                    <label for="username">Tên đăng nhập</label>
+                                    <input type="text" id="username" class="form-control" placeholder="Nhập tên đăng nhập">
+                                </div>
+                                <div class="form-group">
+                                    <label for="password">Mật khẩu</label>
+                                    <input type="password" id="password" class="form-control" placeholder="Nhập mật khẩu">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Quản lý danh mục bài học -->
+                <div class="tab-pane" id="tab2">
+                    <div class="panel">
+                        <div class="panel-header">
+                            Thêm, sửa, xóa nội dung bài học
+                        </div>
+                        <div class="panel-body">
+                            <div class="action-buttons" style="margin-bottom: 20px;">
+                                <button class="btn btn-primary"><i class="fas fa-plus"></i> Thêm bài học mới</button>
+                            </div>
+
+                            <div class="filters">
+                                <div class="filter-item">
+                                    <select class="form-control">
+                                        <option value="">--- Chọn chủ đề ---</option>
+                                        <option value="1">Biển báo giao thông</option>
+                                        <option value="2">Luật giao thông đường bộ</option>
+                                        <option value="3">Kỹ năng lái xe an toàn</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <select class="form-control">
+                                        <option value="">--- Chọn cấp độ ---</option>
+                                        <option value="1">Cơ bản</option>
+                                        <option value="2">Trung cấp</option>
+                                        <option value="3">Nâng cao</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item search-box">
+                                    <input type="text" class="form-control" placeholder="Tìm kiếm bài học...">
+                                    <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th width="5%">ID</th>
+                                            <th width="30%">Tên bài học</th>
+                                            <th width="20%">Chủ đề</th>
+                                            <th width="10%">Cấp độ</th>
+                                            <th width="15%">Trạng thái</th>
+                                            <th width="20%">Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Biển báo cấm và biển hiệu lệnh</td>
+                                            <td>Biển báo giao thông</td>
+                                            <td>Cơ bản</td>
+                                            <td><span class="status status-published">Đã xuất bản</span></td>
+                                            <td class="action-buttons">
+                                                <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i> Sửa</button>
+                                                <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i> Xóa</button>
+                                                <button class="btn btn-sm btn-success"><i class="fas fa-eye"></i> Xem</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Quy tắc ưu tiên tại giao lộ</td>
+                                            <td>Luật giao thông đường bộ</td>
+                                            <td>Trung cấp</td>
+                                            <td><span class="status status-draft">Bản nháp</span></td>
+                                            <td class="action-buttons">
+                                                <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i> Sửa</button>
+                                                <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i> Xóa</button>
+                                                <button class="btn btn-sm btn-success"><i class="fas fa-eye"></i> Xem</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>Kỹ thuật lái xe khi vào cua</td>
+                                            <td>Kỹ năng lái xe an toàn</td>
+                                            <td>Nâng cao</td>
+                                            <td><span class="status status-pending">Chờ duyệt</span></td>
+                                            <td class="action-buttons">
+                                                <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i> Sửa</button>
+                                                <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i> Xóa</button>
+                                                <button class="btn btn-sm btn-success"><i class="fas fa-eye"></i> Xem</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="panel mt-4">
+                                <div class="panel-header">
+                                    Phân loại bài học theo chủ đề, cấp độ
+                                </div>
+                                <div class="panel-body">
+                                    <form>
+                                        <div class="form-group">
+                                            <label for="lesson_id">Chọn bài học</label>
+                                            <select id="lesson_id" class="form-control">
+                                                <option value="">--- Chọn bài học ---</option>
+                                                <option value="1">Biển báo cấm và biển hiệu lệnh</option>
+                                                <option value="2">Quy tắc ưu tiên tại giao lộ</option>
+                                                <option value="3">Kỹ thuật lái xe khi vào cua</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="category_id">Chủ đề</label>
+                                            <select id="category_id" class="form-control">
+                                                <option value="">--- Chọn chủ đề ---</option>
+                                                <option value="1">Biển báo giao thông</option>
+                                                <option value="2">Luật giao thông đường bộ</option>
+                                                <option value="3">Kỹ năng lái xe an toàn</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="level_id">Cấp độ</label>
+                                            <select id="level_id" class="form-control">
+                                                <option value="">--- Chọn cấp độ ---</option>
+                                                <option value="1">Cơ bản</option>
+                                                <option value="2">Trung cấp</option>
+                                                <option value="3">Nâng cao</option>
+                                            </select>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Cập nhật phân loại</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Quản lý câu hỏi kiểm tra -->
+                <div class="tab-pane" id="tab3">
+                    <div class="panel">
+                        <div class="panel-header">
+                            Thêm mới câu hỏi trắc nghiệm, mở phỏng
+                        </div>
+                        <div class="panel-body">
+                            <div class="action-buttons" style="margin-bottom: 20px;">
+                                <button class="btn btn-primary"><i class="fas fa-plus"></i> Thêm câu hỏi mới</button>
+                            </div>
+
+                            <div class="filters">
+                                <div class="filter-item">
+                                    <select class="form-control">
+                                        <option value="">--- Loại câu hỏi ---</option>
+                                        <option value="1">Trắc nghiệm</option>
+                                        <option value="2">Mở phỏng</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <select class="form-control">
+                                        <option value="">--- Chọn bài học ---</option>
+                                        <option value="1">Biển báo cấm và biển hiệu lệnh</option>
+                                        <option value="2">Quy tắc ưu tiên tại giao lộ</option>
+                                        <option value="3">Kỹ thuật lái xe khi vào cua</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item search-box">
+                                    <input type="text" class="form-control" placeholder="Tìm kiếm câu hỏi...">
+                                    <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th width="5%">ID</th>
+                                            <th width="40%">Nội dung câu hỏi</th>
+                                            <th width="15%">Loại</th>
+                                            <th width="15%">Bài học</th>
+                                            <th width="10%">Số đáp án</th>
+                                            <th width="15%">Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Biển báo nào dưới đây là biển cấm đỗ xe?</td>
+                                            <td>Trắc nghiệm</td>
+                                            <td>Biển báo cấm và biển hiệu lệnh</td>
+                                            <td>4</td>
+                                            <td class="action-buttons">
+                                                <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i> Sửa</button>
+                                                <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i> Xóa</button>
+                                                <button class="btn btn-sm btn-success"><i class="fas fa-eye"></i> Xem</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Khi gặp đèn vàng tại ngã tư, bạn sẽ làm gì?</td>
+                                            <td>Trắc nghiệm</td>
+                                            <td>Quy tắc ưu tiên tại giao lộ</td>
+                                            <td>3</td>
+                                            <td class="action-buttons">
+                                                <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i> Sửa</button>
+                                                <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i> Xóa</button>
+                                                <button class="btn btn-sm btn-success"><i class="fas fa-eye"></i> Xem</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>Mô phỏng tình huống xử lý khi có người đi bộ qua đường</td>
+                                            <td>Mở phỏng</td>
+                                            <td>Kỹ năng lái xe an toàn</td>
+                                            <td>2</td>
+                                            <td class="action-buttons">
+                                                <button class="btn btn-sm btn-primary"><i class="fas fa-edit"></i> Sửa</button>
+                                                <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i> Xóa</button>
+                                                <button class="btn btn-sm btn-success"><i class="fas fa-eye"></i> Xem</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="panel mt-4">
+                                <div class="panel-header">
+                                    Cập nhật đáp án, thời gian làm bài
+                                </div>
+                                <div class="panel-body">
+                                    <form>
+                                        <div class="form-group">
+                                            <label for="question_id">Chọn câu hỏi</label>
+                                            <select id="question_id" class="form-control">
+                                                <option value="">--- Chọn câu hỏi ---</option>
+                                                <option value="1">Biển báo nào dưới đây là biển cấm đỗ xe?</option>
+                                                <option value="2">Khi gặp đèn vàng tại ngã tư, bạn sẽ làm gì?</option>
+                                                <option value="3">Mô phỏng tình huống xử lý khi có người đi bộ qua đường</option>
+                                            </select>
+                                        </div>
+
+                                        <div id="answers-container">
+                                            <h5>Đáp án</h5>
+                                            <div class="form-group">
+                                                <label for="answer1">Đáp án 1</label>
+                                                <input type="text" id="answer1" class="form-control" value="Biển báo P.123">
+                                                <div class="form-check mt-2">
+                                                    <input class="form-check-input" type="radio" name="correct_answer" id="answer2_correct" value="2">
+                                                    <label class="form-check-label" for="answer2_correct">
+                                                        Đáp án đúng
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="answer3">Đáp án 3</label>
+                                                <input type="text" id="answer3" class="form-control" value="Biển báo P.127">
+                                                <div class="form-check mt-2">
+                                                    <input class="form-check-input" type="radio" name="correct_answer" id="answer3_correct" value="3">
+                                                    <label class="form-check-label" for="answer3_correct">
+                                                        Đáp án đúng
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="answer4">Đáp án 4</label>
+                                                <input type="text" id="answer4" class="form-control" value="Biển báo P.125">
+                                                <div class="form-check mt-2">
+                                                    <input class="form-check-input" type="radio" name="correct_answer" id="answer4_correct" value="4">
+                                                    <label class="form-check-label" for="answer4_correct">
+                                                        Đáp án đúng
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="time_limit">Thời gian làm bài (giây)</label>
+                                            <input type="number" id="time_limit" class="form-control" value="30">
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary">Cập nhật</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="panel mt-4">
+                                <div class="panel-header">
+                                    Xóa câu hỏi không còn phù hợp
+                                </div>
+                                <div class="panel-body">
+                                    <form>
+                                        <div class="form-group">
+                                            <label for="question_delete">Chọn câu hỏi cần xóa</label>
+                                            <select id="question_delete" class="form-control">
+                                                <option value="">--- Chọn câu hỏi ---</option>
+                                                <option value="1">Biển báo nào dưới đây là biển cấm đỗ xe?</option>
+                                                <option value="2">Khi gặp đèn vàng tại ngã tư, bạn sẽ làm gì?</option>
+                                                <option value="3">Mô phỏng tình huống xử lý khi có người đi bộ qua đường</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="delete_reason">Lý do xóa</label>
+                                            <textarea id="delete_reason" class="form-control" rows="3" placeholder="Nhập lý do xóa câu hỏi này"></textarea>
+                                        </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="confirm_delete">
+                                            <label class="form-check-label" for="confirm_delete">
+                                                Tôi xác nhận câu hỏi này không còn phù hợp và cần xóa
+                                            </label>
+                                        </div>
+                                        <button type="submit" class="btn btn-danger">Xóa câu hỏi</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 4: Kiểm duyệt và xuất bản nội dung -->
+                <div class="tab-pane" id="tab4">
+                    <div class="panel">
+                        <div class="panel-header">
+                            Kiểm tra nội dung trước khi công khai
+                        </div>
+                        <div class="panel-body">
+                            <div class="filters">
+                                <div class="filter-item">
+                                    <select class="form-control">
+                                        <option value="">--- Loại nội dung ---</option>
+                                        <option value="1">Bài học</option>
+                                        <option value="2">Câu hỏi</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <select class="form-control">
+                                        <option value="">--- Trạng thái ---</option>
+                                        <option value="1">Chờ duyệt</option>
+                                        <option value="2">Đã duyệt</option>
+                                        <option value="3">Từ chối</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item search-box">
+                                    <input type="text" class="form-control" placeholder="Tìm kiếm...">
+                                    <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th width="5%">ID</th>
+                                            <th width="15%">Loại</th>
+                                            <th width="30%">Tiêu đề/Nội dung</th>
+                                            <th width="15%">Người tạo</th>
+                                            <th width="15%">Ngày tạo</th>
+                                            <th width="20%">Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Bài học</td>
+                                            <td>Kỹ thuật lái xe khi vào cua</td>
+                                            <td>admin1</td>
+                                            <td>18/03/2023</td>
+                                            <td class="action-buttons">
+                                                <button class="btn btn-sm btn-success"><i class="fas fa-check"></i> Duyệt</button>
+                                                <button class="btn btn-sm btn-danger"><i class="fas fa-times"></i> Từ chối</button>
+                                                <button class="btn btn-sm btn-primary"><i class="fas fa-eye"></i> Xem</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>Câu hỏi</td>
+                                            <td>Khi vào cua, tốc độ an toàn phụ thuộc vào những yếu tố nào?</td>
+                                            <td>admin2</td>
+                                            <td>19/03/2023</td>
+                                            <td class="action-buttons">
+                                                <button class="btn btn-sm btn-success"><i class="fas fa-check"></i> Duyệt</button>
+                                                <button class="btn btn-sm btn-danger"><i class="fas fa-times"></i> Từ chối</button>
+                                                <button class="btn btn-sm btn-primary"><i class="fas fa-eye"></i> Xem</button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>Bài học</td>
+                                            <td>Xử lý tình huống khi xe bị trượt</td>
+                                            <td>admin1</td>
+                                            <td>20/03/2023</td>
+                                            <td class="action-buttons">
+                                                <button class="btn btn-sm btn-success"><i class="fas fa-check"></i> Duyệt</button>
+                                                <button class="btn btn-sm btn-danger"><i class="fas fa-times"></i> Từ chối</button>
+                                                <button class="btn btn-sm btn-primary"><i class="fas fa-eye"></i> Xem</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="panel mt-4">
+                                <div class="panel-header">
+                                    Xuất bản bài học, câu hỏi kiểm tra lên hệ thống
+                                </div>
+                                <div class="panel-body">
+                                    <form>
+                                        <div class="form-group">
+                                            <label for="content_publish">Chọn nội dung cần xuất bản</label>
+                                            <select id="content_publish" class="form-control">
+                                                <option value="">--- Chọn nội dung ---</option>
+                                                <option value="l1">Bài học: Kỹ thuật lái xe khi vào cua</option>
+                                                <option value="q1">Câu hỏi: Khi vào cua, tốc độ an toàn phụ thuộc vào những yếu tố nào?</option>
+                                                <option value="l2">Bài học: Xử lý tình huống khi xe bị trượt</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="publish_note">Ghi chú</label>
+                                            <textarea id="publish_note" class="form-control" rows="3" placeholder="Nhập ghi chú khi xuất bản (nếu có)"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="publish_date">Ngày xuất bản</label>
+                                            <input type="date" id="publish_date" class="form-control">
+                                        </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="confirm_publish">
+                                            <label class="form-check-label" for="confirm_publish">
+                                                Tôi xác nhận nội dung này đã được kiểm duyệt và sẵn sàng xuất bản
+                                            </label>
+                                        </div>
+                                        <button type="submit" class="btn btn-success">Xuất bản</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 5: Theo dõi và cập nhật nội dung -->
+                <div class="tab-pane" id="tab5">
+                    <div class="panel">
+                        <div class="panel-header">
+                            Xem phản hồi từ người chơi để cải thiện nội dung
+                        </div>
+                        <div class="panel-body">
+                            <div class="filters">
+                                <div class="filter-item">
+                                    <select class="form-control">
+                                        <option value="">--- Loại nội dung ---</option>
+                                        <option value="1">Bài học</option>
+                                        <option value="2">Câu hỏi</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <select class="form-control">
+                                        <option value="">--- Đánh giá ---</option>
+                                        <option value="5">5 sao</option>
+                                        <option value="4">4 sao</option>
+                                        <option value="3">3 sao</option>
+                                        <option value="2">2 sao</option>
+                                        <option value="1">1 sao</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item search-box">
+                                    <input type="text" class="form-control" placeholder="Tìm kiếm phản hồi...">
+                                    <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th width="5%">ID</th>
+                                            <th width="15%">Người dùng</th>
+                                            <th width="25%">Nội dung</th>
+                                            <th width="25%">Phản hồi</th>
+                                            <th width="10%">Đánh giá</th>
+                                            <th width="10%">Ngày gửi</th>
+                                            <th width="10%">Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>user123</td>
+                                            <td>Bài học: Biển báo cấm và biển hiệu lệnh</td>
+                                            <td>Cần bổ sung thêm ví dụ minh họa cho dễ hiểu</td>
+                                            <td>
+                                                <div style="color: gold;">
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="far fa-star"></i>
+                                                    <i class="far fa-star"></i>
+                                                </div>
+                                            </td>
+                                            <td>18/03/2023</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary"><i class="fas fa-reply"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td>user456</td>
+                                            <td>Câu hỏi: Thứ tự ưu tiên tại giao lộ</td>
+                                            <td>Hình ảnh không rõ ràng, khó nhìn</td>
+                                            <td>
+                                                <div style="color: gold;">
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="far fa-star"></i>
+                                                    <i class="far fa-star"></i>
+                                                    <i class="far fa-star"></i>
+                                                </div>
+                                            </td>
+                                            <td>19/03/2023</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary"><i class="fas fa-reply"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td>user789</td>
+                                            <td>Bài học: Quy tắc ưu tiên tại giao lộ</td>
+                                            <td>Nội dung rất dễ hiểu, có nhiều ví dụ thực tế</td>
+                                            <td>
+                                                <div style="color: gold;">
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                </div>
+                                            </td>
+                                            <td>20/03/2023</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary"><i class="fas fa-reply"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="panel mt-4">
+                                <div class="panel-header">
+                                    Điều chỉnh, bổ sung nội dung theo nhu cầu thực tế
+                                </div>
+                                <div class="panel-body">
+                                    <form>
+                                        <div class="form-group">
+                                            <label for="content_update">Chọn nội dung cần cập nhật</label>
+                                            <select id="content_update" class="form-control">
+                                                <option value="">--- Chọn nội dung ---</option>
+                                                <option value="l1">Bài học: Biển báo cấm và biển hiệu lệnh</option>
+                                                <option value="q1">Câu hỏi: Thứ tự ưu tiên tại giao lộ</option>
+                                                <option value="l2">Bài học: Quy tắc ưu tiên tại giao lộ</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="update_content">Nội dung cập nhật</label>
+                                            <textarea id="update_content" class="form-control" rows="6" placeholder="Nhập nội dung cần cập nhật"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="update_reason">Lý do cập nhật</label>
+                                            <textarea id="update_reason" class="form-control" rows="3" placeholder="Nhập lý do cập nhật nội dung"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Tài liệu đính kèm (nếu có)</label>
+                                            <input type="file" class="form-control">
+                                        </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="update_notify">
+                                            <label class="form-check-label" for="update_notify">
+                                                Thông báo cho người dùng về việc cập nhật nội dung
+                                            </label>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Cập nhật nội dung</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript cho việc chuyển đổi tabs
+        document.addEventListener('DOMContentLoaded', function() {
+            // Lấy tất cả các tab items
+            const tabItems = document.querySelectorAll('.tab-item');
+            
+            // Thêm sự kiện click cho mỗi tab
+            tabItems.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Xóa class active khỏi tất cả các tab
+                    tabItems.forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    
+                    // Thêm class active cho tab được click
+                    this.classList.add('active');
+                    
+                    // Ẩn tất cả các tab panes
+                    const tabPanes = document.querySelectorAll('.tab-pane');
+                    tabPanes.forEach(pane => {
+                        pane.classList.remove('active');
+                    });
+                    
+                    // Hiển thị tab pane tương ứng
+                    const targetId = this.getAttribute('data-tab');
+                    document.getElementById(targetId).classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html> class="form-check-input" type="radio" name="correct_answer" id="answer1_correct" value="1" checked>
+                                                    <label class="form-check-label" for="answer1_correct">
+                                                        Đáp án đúng
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="answer2">Đáp án 2</label>
+                                                <input type="text" id="answer2" class="form-control" value="Biển báo P.130">
+                                                <div class="form-check mt-2">
+                                                    <input
